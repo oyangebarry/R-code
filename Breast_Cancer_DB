@@ -1,0 +1,51 @@
+breast.cancer <- read.table(file="http://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data",
+                            header = FALSE, sep=",", 
+                            colClasses = NA, stringsAsFactor = FALSE, na.strings = "?")
+
+breast.cancer.new <- breast.cancer[,2:11] 
+
+names(breast.cancer.new) <- c("clump_thickness",
+                              "uniform_cellsize",
+                              "uniform_cellshape",
+                              "marginal_adhesion",
+                              "epithelial_cellsize",
+                              "bare_nuclei",
+                              "bland_chromatin",
+                              "normal_nucleoli",
+                              "mitoses",
+                              "class")
+
+breast.cancer.new <- na.omit(breast.cancer.new)
+
+# class, 2 = benign, 4 = malignant
+
+data.cluster <- breast.cancer.new[,-10]
+
+# Hierarchical Clustering and Dendrogram plot
+
+data.cluster <- scale(data.cluster)
+
+# distance matrix (distance between each observations) using dist() function
+distance_matrix <- dist(data.cluster, method = "euclidean")
+cancer.h.clust <- hclust(d = distance_matrix, method = "complete")
+plot(cancer.h.clust, hang = 0.1, main = "Hierarchial Cluster", cex=0.5)
+
+
+# dendrogram tree cut to get TWO clusters
+clusters <- cutree(cancer.h.clust, k = 2)
+table(clusters, breast.cancer.new$class)
+
+
+# Silhouette Width and Rand Index of the obtained clutering
+# Silhouette Width
+library("cluster")
+si <- silhouette(clusters, dist(data.cluster, method="euclidean"))
+# average silhouette width
+print(mean(si[,3]))
+# 0.5307819
+
+# Adjusted Rand Index
+library("flexclust")
+tbl <- table(clusters, breast.cancer.new$class)
+randIndex(tbl)
+# 0.4795024
