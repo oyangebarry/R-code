@@ -1,0 +1,73 @@
+# Downloaded "Adult" dataset from UCI Machine Learning Repository
+# URL http://archive.ics.uci.edu/ml/datasets/Adult
+adult_db <- read.table("http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data", FALSE, ",", stringsAsFactors = FALSE, na.strings = " ?")
+class(adult_db)
+adult_db
+ 
+ names(adult_db) = c("age",
+                      "workclass",
+                      "fnlwgt",
+                      "education",
+                      "education_num",
+                      "marital_status",
+                      "occupation",
+                      "relationship",
+                      "race",
+                      "sex",
+                      "capital_gain",
+                      "capital_loss",
+                      "hours_per_week",
+                      "native_country",
+                      "class")
+  
+  
+  
+  # Inspect data set in tabular form
+  # -----------------------------
+  fix(adult_db)
+  
+  # Change class labels to 1 (adults who earn more than 50K) and 0 (adults who earn less than or equal to 50K)
+  # ----------------------------------------------------------------------------------------------
+  adult_db$class[adult_db$class==">50K"] <- 1
+  adult_db$class[adult_db$class=="<=50K"] <- 0
+  
+  
+  # 2. Check for missing values
+  # Code to check how many missing values each attribute has
+  
+  apply(adult_db, 2, function(x) sum(is.na(x)))
+  
+  # Delete records (rows) with any missing value
+    adult_db_nomiss <- na.omit(adult_db)
+    
+    
+  # 3. We will take only small chunk of the data for our experimental purpose.
+    # So, randomly select 1000 records from among 30 thousand records in the dataset.
+    set.seed(1013)
+  idx = sample(1:nrow(adult_db_nomiss),1000)
+  adult_db_lim = adult_db_nomiss[idx,]
+  row.names(adult_db_lim) <- NULL
+  
+  fix(adult_db_lim)
+  
+  
+  # Examine attributes of the dataset
+  # 3a. Plot histogram for numeric attribute "age", with 50 breaks, show main title and attribute name on the plot.
+    # *************** #
+  hist(adult_db$age, breaks = 50, main = "Age of Adults", xlab = "age")
+  
+  # 3b. Plot barchart for categorical attribute "race", show legend, attribute name and main title for the plot.
+  # ************** #
+  barplot(adult_db$race, main="RACE OF ADULTS", xlab="race", names.arg= c("Amer-Indian-Eskimo", "Asian-pac-Islander", "Black", "Other", "White"), col=colours)
+  
+  # 3c. Plot a boxplot for attribute "Age" and show possible outlier for this attribute
+  # *********** #
+  bp <- boxplot(adult_db$age, main = "Age of Adults", ylab = "age", col="green")
+  
+  # show possible outlier values
+  boxplot.stats(adult_db_lim$age)$out
+    
+  
+  #4 New data set from our latest dataset with only numeric attributes
+  adult_db_numeric <- adult_db_lim[,c("age", "fnlwgt", "education_num", "capital_gain", "capital_loss", "hours_per_week")]
+  class_val <- as.numeric(adult_db_lim[,c("class")])
